@@ -11,7 +11,6 @@
 
 // proměnné pro běh programu
 char rdsBuffer[10];
-char rdsBuffer2[10];
 int  frekvence;
 
 
@@ -21,9 +20,9 @@ int  frekvence;
 #define pinSW 5
 
 //enkoder II
-#define pinCLK2 8
+#define pinCLK2 6
 #define pinDT2 7
-#define pinSW2 6
+#define pinSW2 9
 
 // proměnné pro uložení pozice a stavů pro určení směru
 // a stavu tlačítka
@@ -36,7 +35,7 @@ int stavCLK2;
 int stavSW2;
 
 unsigned long lastRefresh;
-unsigned long lastRefresh2;
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 SI4703 radio;
 
@@ -71,7 +70,7 @@ void setup() {
   // jako vstupní s pull up odporem
   pinMode(pinSW2, INPUT_PULLUP);
   // načtení aktuálního stavu pinu CLK pro porovnávání
-  stavPred = digitalRead(pinCLK2);  
+  stavPred2 = digitalRead(pinCLK2);  
 
 }
 
@@ -86,12 +85,14 @@ int frekvence = radio.getFrequency();
 
 
 checkEncoder(volume);
-checkEncoder(frekvence);
+checkEncoder2(frekvence);
+
 
 if(millis()-lastRefresh > 100)
 {
   lastRefresh = millis();
   zobrazInfo(buffer, volume);
+  zobrazInfo(buffer, frekvence);
 }
 
 
@@ -100,13 +101,14 @@ void zobrazInfo(char *frekvence, int hlasitost) {
   // vytištění informací z proměnných
   lcd.setCursor(0,0);
   lcd.print(frekvence);
+  lcd.print(" ");
   lcd.setCursor(0,1);
   lcd.print("Hlasitost: "); 
   //if (hlasitost < 10)
   //{
     lcd.print(hlasitost);
     lcd.print(" ");
-    lcd.print("Stisknuto tlacitko enkoderu!");
+ 
     
   //}
   /*//else
@@ -129,7 +131,6 @@ void checkEncoder(int hlasitost)
         // hodnoty 1 u počítadla pozice enkodéru
     
         hlasitost ++;
-        
         if (hlasitost > 15) 
           hlasitost = 15;
 
@@ -152,16 +153,30 @@ void checkEncoder(int hlasitost)
   }
 stavPred = stavCLK;
 }
-void checkEncoder(char *frekvence){
-  // načtení stavu pinu SW - tlačítko
-  stavSW = digitalRead(pinSW);
-  // v případě stisknutí vytiskni informaci
-  // po sériové lince
-  if (stavSW == '0') {
-int frekvence = radio.seekUp();
-else  (stavSW == '1') {
-int frekvence = radio.seekDown();
+void checkEncoder2(int frekvence) {
+
+   stavCLK2 = digitalRead(pinCLK2);
+ if (stavCLK2 != stavPred2){
+   if (digitalRead(pinDT2) != stavCLK2)
+   {
+     frekvence +=5;
+     if (frekvence > 9650)
+       frekvence = 9650;
+  radio.setBandFrequency(RADIO_BAND_FM, 9650);
+}
+ else{
+     frekvence -=5;
+     if (frekvence < 0)
+     frekvence = 0;
      
-}
-}
+radio.setBandFrequency(RADIO_BAND_FM, 9650);
+ }
+   
+
+ }
+     
+
+
+stavPred2 = stavCLK2;
+
 }
