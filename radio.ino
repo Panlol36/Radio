@@ -145,32 +145,34 @@ void checkEncoder(int hlasitost)
         hlasitost = 0;
 
         radio.setVolume(hlasitost);
+
+    
+
       }  
   }
 stavPred = stavCLK;
 }
-void checkEncoder2(int frekvence) {
+void checkEncoder2(char *frekvence) {
 
    stavCLK2 = digitalRead(pinCLK2);
  if (stavCLK2 != stavPred2){
    if (digitalRead(pinDT2) != stavCLK2)
    {
-     frekvence +=5;
+     frekvence += 10;
      if (frekvence > 9650)
        frekvence = 9650;
-  radio.setBandFrequency(RADIO_BAND_FM, 9650);
+  radio.setFrequency(frekvence);
 }
- else
- {
-     frekvence -=5;
+ else{
+     frekvence -= 10;
      if (frekvence < 0)
      frekvence = 0;
      
-radio.setBandFrequency(RADIO_BAND_FM, 9650);
-      }
+radio.setFrequency(frekvence);
+ }
+  
+ }
    
-  }
-    
 stavPred2 = stavCLK2;
 
 }
