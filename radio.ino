@@ -20,6 +20,8 @@
 #define pinDT2 7
 #define pinSW2 9
 
+// rele
+#define pinRele 10
 // proměnné pro uložení pozice a stavů pro určení směru
 // a stavu tlačítka
 int stavPred;
@@ -33,6 +35,8 @@ int stavSW2;
 long lastButtonPressed = 0;
 unsigned long lastRefresh;
 bool backlightState;
+
+bool bluetooth = false;
 
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -91,6 +95,7 @@ int frekvence = radio.getFrequency();
 checkEncoder(volume);
 checkEncoder2(frekvence);
 
+Serial.println(bluetooth);
 
 if(millis()-lastRefresh > 100)
 {
@@ -104,13 +109,21 @@ radio.checkRDS();
 }
 void zobrazInfo(char *frekvence, int hlasitost) {
   // vytištění informací z proměnných
- 
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
+  lcd.clear();
+  if(!bluetooth)
+  {
   lcd.print(frekvence);
-
   lcd.setCursor(14,1);
   lcd.print(hlasitost);
   lcd.print(" ");
+  }
+  else
+  {
+    lcd.setCursor(3,0);
+    lcd.print("BLUETOOTH");
+  }
+  
 }
 
 void checkEncoder(int hlasitost) 
@@ -177,7 +190,7 @@ radio.setFrequency(frekvence);
     
 stavPred2 = stavCLK2;
 
-stavSW2 = digitalRead(pinSW2);
+/*stavSW2 = digitalRead(pinSW2);
 if (stavSW2 == 0){
 radio.seekDown();
 
@@ -185,8 +198,27 @@ radio.seekDown();
 stavSW = digitalRead(pinSW);
 if (stavSW == 0){
 radio.seekUp();
-}
+}*/
 
+stavSW2 = digitalRead(pinSW2);
+if (stavSW2 == 0)
+{
+  if(digitalRead(pinRele) == LOW)
+  {
+    digitalWrite(pinRele, HIGH);
+    bluetooth = true;
+  }
+  else
+  {
+    digitalWrite(pinRele,LOW);
+    bluetooth = false;
+  }
+}
+stavSW = digitalRead(pinSW);
+if (stavSW == 0)
+{
+  radio.seekUp();
+}
 }
 
   
