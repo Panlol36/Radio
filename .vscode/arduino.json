@@ -2,5 +2,6 @@
     "port": "COM8",
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328",
-    "sketch": "radio.ino"
+    "sketch": "radio.ino",
+    "output": "../meteostanice/build"
 }
